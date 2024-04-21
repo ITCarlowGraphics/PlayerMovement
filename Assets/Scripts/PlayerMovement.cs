@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     public static float speed = 10f;
     public int space = 1;
     public Queue<Space> spacesToMove = new Queue<Space>();
+    public Queue<bool> rollDirectionBackwards = new Queue<bool> ();
 
     private void Update()
     {
@@ -18,81 +19,21 @@ public class PlayerMovement : MonoBehaviour
 
     void move()
     {
-        if (spacesToMove.Peek().spaceNumber > space)
+        Vector3 dir;
+        if (rollDirectionBackwards.Peek() == false)
         {
-            switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].side)
-            {
-                case Space.Side.Bottom:
-                    transform.Translate(-Vector3.forward * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Right:
-                    transform.Translate(-Vector3.left * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Top:
-                    transform.Translate(-Vector3.back * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Left:
-                    transform.Translate(-Vector3.right * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Corner:
-                    switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber + 1].side)
-                    {
-                        case Space.Side.Bottom:
-                            transform.Translate(-Vector3.forward * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Right:
-                            transform.Translate(-Vector3.left * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Top:
-                            transform.Translate(-Vector3.back * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Left:
-                            transform.Translate(-Vector3.right * Time.deltaTime * speed);
-                            break;
-                    }
-                    break;
-            }
+            dir = GetDirection(spacesToMove.Peek().spaceNumber, false);
         }
         else
         {
-            switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].side)
-            {
-                case Space.Side.Bottom:
-                    transform.Translate(-Vector3.back * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Right:
-                    transform.Translate(-Vector3.right * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Top:
-                    transform.Translate(-Vector3.forward * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Left:
-                    transform.Translate(-Vector3.left * Time.deltaTime * speed);
-                    break;
-                case Space.Side.Corner:
-                    switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber + 1].side)
-                    {
-                        case Space.Side.Bottom:
-                            transform.Translate(-Vector3.back * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Right:
-                            transform.Translate(-Vector3.right * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Top:
-                            transform.Translate(-Vector3.forward * Time.deltaTime * speed);
-                            break;
-                        case Space.Side.Left:
-                            transform.Translate(-Vector3.left * Time.deltaTime * speed);
-                            break;
-                    }
-                    break;
-            }
+            dir = -GetDirection(spacesToMove.Peek().spaceNumber, true);
         }
 
-        Vector3 posToCheck = new Vector3(BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].transform.position.x,
+        Vector3 posToCheck = new Vector3(BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].transform.position.x,
                                             transform.position.y,
-                                            BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].transform.position.z);
-        switch(BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].side)
+                                            BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].transform.position.z);
+
+        switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].side)
         {
             case Space.Side.Bottom:
                 posToCheck.x = transform.position.x;
@@ -107,7 +48,16 @@ public class PlayerMovement : MonoBehaviour
                 posToCheck.x = transform.position.z;
                 break;
             case Space.Side.Corner:
-                switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber + 1].side)
+                Space.Side s;
+                if (rollDirectionBackwards.Peek() == false)
+                {
+                    s = BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 2].side;
+                }
+                else
+                {
+                    s = BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].side;
+                }
+                switch (s)
                 {
                     case Space.Side.Bottom:
                         posToCheck.x = transform.position.x;
@@ -124,10 +74,36 @@ public class PlayerMovement : MonoBehaviour
                 }
                 break;
         }
-        //Debug.Log(Vector3.Distance(posToCheck, transform.position));
+
+        transform.Translate(dir * Time.deltaTime * speed);
+
         if (Vector3.Distance(posToCheck, transform.position) < 0.1f)
         {
-            space = spacesToMove.Dequeue().spaceNumber;
+            spacesToMove.Dequeue();
+            rollDirectionBackwards.Dequeue();
         }
     }
+
+    Vector3 GetDirection(int _space, bool backwards)
+    {
+        switch (BoardManager.instance.Spaces[_space - 1].side)
+        {
+            case Space.Side.Bottom:
+                return new Vector3(0, 0, -1);
+            case Space.Side.Right:
+                return new Vector3(1, 0, 0);
+            case Space.Side.Top:
+                return new Vector3(0, 0, 1);
+            case Space.Side.Left:
+                return new Vector3(-1, 0, 0);
+            case Space.Side.Corner:
+                if (!backwards)
+                    return GetDirection(_space - 1, false);
+                else
+                    return GetDirection(_space + 1, true);
+            default:
+                return Vector3.down;
+        }
+    }
+
 }

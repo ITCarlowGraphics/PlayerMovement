@@ -44,7 +44,7 @@ public class BoardManager : MonoBehaviour
 
     public void Move(int player, int amount)
     {
-        Transform playerToMove = null;
+        Transform playerToMove;
         switch (player)
         {
             case 0:
@@ -64,19 +64,28 @@ public class BoardManager : MonoBehaviour
         }
 
         PlayerMovement pm = playerToMove.GetComponent<PlayerMovement>();
+        int amountToMove = 1;
         if (amount > 0)
         {
-            for (int i = 1; i == amount; i++)
+            for (int i = 0; i < amount; i++)
             {
-                pm.spacesToMove.Enqueue(Spaces[pm.space - 2 + i]);
+                pm.spacesToMove.Enqueue(Spaces[(pm.space - 1) + amountToMove]);
+                pm.rollDirectionBackwards.Enqueue(false);
+                amountToMove++;
             }
+            int x = (pm.space - 1) + amountToMove;
+            pm.space = Spaces[x - 1].spaceNumber;
         }
         else
         {
-            for (int i = 1; i == amount; i++)
+            for (int i = 0; i < amount; i++)
             {
-                pm.spacesToMove.Enqueue(Spaces[pm.space - 2 - i]);
+                pm.spacesToMove.Enqueue(Spaces[(pm.space - 1) - amountToMove]);
+                pm.rollDirectionBackwards.Enqueue(true);
+                amountToMove++;
             }
+            int x = (pm.space - 1) - amountToMove;
+            pm.space = Spaces[x - 1].spaceNumber;
         }
     }
 }

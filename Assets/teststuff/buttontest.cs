@@ -11,12 +11,8 @@ public class buttontest : MonoBehaviour
     public void movepsaces()
     {
         string inputtext = input.text;
-        int num = int.Parse(inputtext);
-        if (num > 0 && num <= 6 ||
-            num < 0 && num >= -6)
-        {
-            BoardManager.instance.Move(player, num);
-        }
+        int num = int.Parse(inputtext, System.Globalization.NumberStyles.Integer);
+        BoardManager.instance.Move(player, num);
     }
 
     public void changeplayer()
