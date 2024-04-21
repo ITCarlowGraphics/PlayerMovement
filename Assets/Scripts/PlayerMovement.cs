@@ -19,91 +19,57 @@ public class PlayerMovement : MonoBehaviour
 
     void move()
     {
-        Vector3 dir;
-        if (rollDirectionBackwards.Peek() == false)
+        if (spacesToMove.Count > 0)
         {
-            dir = GetDirection(spacesToMove.Peek().spaceNumber, false);
-        }
-        else
-        {
-            dir = -GetDirection(spacesToMove.Peek().spaceNumber, true);
-        }
+            Space targetSpace = spacesToMove.Peek();
+            Vector3 targetPosition = CalculateTargetPosition(targetSpace);
 
-        Vector3 posToCheck = new Vector3(BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].transform.position.x,
-                                            transform.position.y,
-                                            BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].transform.position.z);
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
 
-        switch (BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 1].side)
-        {
-            case Space.Side.Bottom:
-                posToCheck.x = transform.position.x;
-                break;
-            case Space.Side.Top:
-                posToCheck.x = transform.position.x;
-                break;
-            case Space.Side.Left:
-                posToCheck.x = transform.position.z;
-                break;
-            case Space.Side.Right:
-                posToCheck.x = transform.position.z;
-                break;
-            case Space.Side.Corner:
-                Space.Side s;
-                if (rollDirectionBackwards.Peek() == false)
-                {
-                    s = BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber - 2].side;
-                }
-                else
-                {
-                    s = BoardManager.instance.Spaces[spacesToMove.Peek().spaceNumber].side;
-                }
-                switch (s)
-                {
-                    case Space.Side.Bottom:
-                        posToCheck.x = transform.position.x;
-                        break;
-                    case Space.Side.Top:
-                        posToCheck.x = transform.position.x;
-                        break;
-                    case Space.Side.Left:
-                        posToCheck.x = transform.position.z;
-                        break;
-                    case Space.Side.Right:
-                        posToCheck.x = transform.position.z;
-                        break;
-                }
-                break;
-        }
-
-        transform.Translate(dir * Time.deltaTime * speed);
-
-        if (Vector3.Distance(posToCheck, transform.position) < 0.1f)
-        {
-            spacesToMove.Dequeue();
-            rollDirectionBackwards.Dequeue();
+            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+            {
+                spacesToMove.Dequeue();
+                rollDirectionBackwards.Dequeue();
+            }
         }
     }
 
-    Vector3 GetDirection(int _space, bool backwards)
+    Vector3 CalculateTargetPosition(Space targetSpace)
     {
-        switch (BoardManager.instance.Spaces[_space - 1].side)
+        List<Transform> playersOnSpace = targetSpace.playersOnSpace;
+        if (playersOnSpace.Count == 0)
         {
-            case Space.Side.Bottom:
-                return new Vector3(0, 0, -1);
-            case Space.Side.Right:
-                return new Vector3(1, 0, 0);
-            case Space.Side.Top:
-                return new Vector3(0, 0, 1);
-            case Space.Side.Left:
-                return new Vector3(-1, 0, 0);
-            case Space.Side.Corner:
-                if (!backwards)
-                    return GetDirection(_space - 1, false);
-                else
-                    return GetDirection(_space + 1, true);
-            default:
-                return Vector3.down;
+            // central position as fallback
+            return targetSpace.transform.position;
         }
-    }
 
+        Vector3 basePosition = new Vector3(targetSpace.transform.position.x, transform.position.y, targetSpace.transform.position.z);
+        int index = playersOnSpace.IndexOf(transform);
+        if (index == -1)
+        {
+            // central position as fallback
+            return basePosition;
+        }
+
+        // offset for multiple on one space
+        float spacing = 1.4f; // spacing between each player
+        float positionOffset = (index - playersOnSpace.Count / 2.0f) * spacing;
+
+        Vector3 offset = Vector3.zero;
+        switch (targetSpace.side)
+        {
+            case Space.Side.Left:
+            case Space.Side.Right:
+                // vertically
+                offset = new Vector3(0, 0, positionOffset);
+                break;
+            case Space.Side.Top:
+            case Space.Side.Bottom:
+                // horizontally
+                offset = new Vector3(positionOffset, 0, 0);
+                break;
+        }
+
+        return basePosition + offset;
+    }
 }

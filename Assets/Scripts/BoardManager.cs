@@ -47,45 +47,42 @@ public class BoardManager : MonoBehaviour
         Transform playerToMove;
         switch (player)
         {
-            case 0:
-                playerToMove = Player0;
-                break;
-            case 1:
-                playerToMove = Player1;
-                break;
-            case 2:
-                playerToMove = Player2;
-                break;
-            case 3:
-                playerToMove = Player3;
-                break;
-            default:
-                return;
+            case 0: playerToMove = Player0; break;
+            case 1: playerToMove = Player1; break;
+            case 2: playerToMove = Player2; break;
+            case 3: playerToMove = Player3; break;
+            default: return; // case for invalid
         }
 
         PlayerMovement pm = playerToMove.GetComponent<PlayerMovement>();
-        int amountToMove = 1;
-        if (amount > 0)
+        if (pm == null) return; // no playerc ontroller found
+
+        Space currentSpace = Spaces[pm.space - 1]; //current space in index form
+        Space newSpace = Spaces[(pm.space - 1 + amount) % Spaces.Count]; // space it is going towards
+
+        currentSpace.RemovePlayer(playerToMove); // remove olld
+        newSpace.AddPlayer(playerToMove); // add new
+
+        pm.spacesToMove.Clear(); // clear existing queues
+        pm.rollDirectionBackwards.Clear();
+
+        bool isMovingBackwards = amount < 0;
+        int step = isMovingBackwards ? -1 : 1; // if backwwards or not
+        int newSpaceIndex = (pm.space - 1 + amount) % Spaces.Count; // new space in index form
+        for (int i = pm.space - 1; i != newSpaceIndex; i += step)
         {
-            for (int i = 0; i < amount; i++)
-            {
-                pm.spacesToMove.Enqueue(Spaces[(pm.space - 1) + amountToMove]);
-                pm.rollDirectionBackwards.Enqueue(false);
-                amountToMove++;
-            }
-            int x = (pm.space - 1) + amountToMove;
-            pm.space = Spaces[x - 1].spaceNumber;
+            if (i >= Spaces.Count) i -= Spaces.Count; // if wrapped (this shouldn't happen)
+            if (i < 0) i += Spaces.Count; // same as above
+
+            pm.spacesToMove.Enqueue(Spaces[i]);
+            pm.rollDirectionBackwards.Enqueue(isMovingBackwards);
         }
-        else
-        {
-            for (int i = 0; i < amount; i++)
-            {
-                pm.spacesToMove.Enqueue(Spaces[(pm.space - 1) - amountToMove]);
-                pm.rollDirectionBackwards.Enqueue(true);
-                amountToMove++;
-            }
-            int x = (pm.space - 1) - amountToMove;
-            pm.space = Spaces[x - 1].spaceNumber;
-        }
+
+        // final destination
+        pm.spacesToMove.Enqueue(newSpace);
+        pm.rollDirectionBackwards.Enqueue(isMovingBackwards);
+
+        // update player
+        pm.space = newSpaceIndex + 1;
     }
 }
