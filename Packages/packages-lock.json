@@ -145,12 +145,10 @@
       "url": "https://packages.unity.com"
     },
     "ie.setu.custommovement": {
-      "version": "file:C:/Users/labuser/Desktop/CustomMovement",
+      "version": "file:PlayerMovement",
       "depth": 0,
-      "source": "local",
-      "dependencies": {
-        "com.unity.cinemachine": "2.8.9"
-      }
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",
