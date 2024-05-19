@@ -1,8 +1,0 @@
-{
-  "name": "ie.setu.custommovement",
-  "version": "0.0.1",
-  "displayName": "Custom Movement",
-  "description": "Package for TOTC",
-  "unity": "2021.3",
-  "unityRelease": "10f1"
-}
