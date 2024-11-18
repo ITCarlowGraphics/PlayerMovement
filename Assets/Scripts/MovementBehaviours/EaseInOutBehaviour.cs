@@ -5,21 +5,20 @@ using UnityEngine;
 
 public class EaseInOutBehaviour : IMovementBehaviour
 {
-    public float speed = 2.5f;
-    public float power = 2f;
+    public float speed = 5f;
     Vector3 p0;
     Vector3 p1;
 
     Vector3 currentPosition;
     private float movementProgress; // Tracks progress manually
-    private float startTime;
-    public float duration = 0.5f;  // Fixed duration to reach the destination
+    private float totalDistance; // Total distance to target
 
     public void SetStartAndEnd(Vector3 start, Vector3 end)
     {
         p0 = start;
         p1 = end;
 
+        totalDistance = Vector3.Distance(p0, p1);
         movementProgress = 0f; // Reset progress
         startTime = Time.time;
     }
@@ -38,24 +37,19 @@ public class EaseInOutBehaviour : IMovementBehaviour
         return false;
     }
 
+    // Update is called once per frame
     public void Update()
     {
-        float elapsedTime = Time.time - startTime;
+        movementProgress += speed * Time.deltaTime / totalDistance;
+        movementProgress = Mathf.Clamp01(movementProgress);
+        float adjustedProgress = movementProgress; // Start with linear
 
-        movementProgress = Mathf.Clamp01(elapsedTime / duration);
-
-        // Generalized power-based Ease-In-Out function
-        float adjustedProgress;
-        if (movementProgress < 0.5f)
-        {
-            // First half: Ease-In
-            adjustedProgress = Mathf.Pow(movementProgress * 2, power) / 2f;
-        }
-        else
-        {
-            // Second half: Ease-Out
-            adjustedProgress = 1f - Mathf.Pow(2f * (1f - movementProgress), power) / 2f;
-        }
+        //Quadratic Movement
+        //adjustedProgress = movementProgress * movementProgress; // Ease-In
+        //adjustedProgress = 1 - Mathf.Pow(1 - movementProgress, 2); // Ease-Out
+        adjustedProgress = (movementProgress < 0.5f)
+            ? 2 * movementProgress * movementProgress // Ease-In-Out (first half)
+            : 1 - 2 * Mathf.Pow(1 - movementProgress, 2); // Ease-In-Out (second half)
 
         currentPosition = Vector3.Lerp(p0, p1, adjustedProgress);
     }
