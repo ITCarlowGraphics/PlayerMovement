@@ -51,38 +51,59 @@ public class BoardManager : MonoBehaviour
             case 1: playerToMove = Player1; break;
             case 2: playerToMove = Player2; break;
             case 3: playerToMove = Player3; break;
-            default: return; // case for invalid
+            default: return; // invalid player case
         }
 
         PlayerMovement pm = playerToMove.GetComponent<PlayerMovement>();
-        if (pm == null) return; // no playerc ontroller found
+        if (pm == null) return; // no player controller found
 
-        Space currentSpace = Spaces[pm.space - 1]; //current space in index form
-        Space newSpace = Spaces[(pm.space - 1 + amount) % Spaces.Count]; // space it is going towards
-
-        currentSpace.RemovePlayer(playerToMove); // remove olld
-        newSpace.AddPlayer(playerToMove); // add new
-
-        pm.spacesToMove.Clear(); // clear existing queues
-        pm.rollDirectionBackwards.Clear();
-
-        bool isMovingBackwards = amount < 0;
-        int step = isMovingBackwards ? -1 : 1; // if backwwards or not
-        int newSpaceIndex = (pm.space - 1 + amount) % Spaces.Count; // new space in index form
-        for (int i = pm.space - 1; i != newSpaceIndex; i += step)
+        int totalSpaces = Spaces.Count;
+        if (pm.space < 0 || pm.space >= totalSpaces)
         {
-            if (i >= Spaces.Count) i -= Spaces.Count; // if wrapped (this shouldn't happen)
-            if (i < 0) i += Spaces.Count; // same as above
-
-            pm.spacesToMove.Enqueue(Spaces[i]);
-            pm.rollDirectionBackwards.Enqueue(isMovingBackwards);
+            // Invalid current space index
+            Debug.LogError($"Invalid space index for player {player}: {pm.space}");
+            return;
         }
 
-        // final destination
-        pm.spacesToMove.Enqueue(newSpace);
-        pm.rollDirectionBackwards.Enqueue(isMovingBackwards);
+        int currentIndex = pm.space; // No conversion needed, already 0-based
+        int newIndex = currentIndex + amount;
 
-        // update player
-        pm.space = newSpaceIndex + 1;
+        // Clamp the newIndex to 0 if it goes below 0
+        if (newIndex < 0)
+        {
+            newIndex = 0;
+        }
+        else
+        {
+            newIndex %= totalSpaces; // Handle wrapping only if newIndex >= 0
+        }
+
+        Space currentSpace = Spaces[currentIndex];
+        Space newSpace = Spaces[newIndex];
+
+        currentSpace.RemovePlayer(playerToMove); // Remove from the old space
+        newSpace.AddPlayer(playerToMove); // Add to the new space
+
+        pm.spacesToMove.Clear(); // Clear existing movement queue
+
+        // Add spaces to the queue for animation/movement
+        bool isMovingBackwards = amount < 0;
+        int step = isMovingBackwards ? -1 : 1;
+
+        // Traverse the spaces correctly, stopping at newIndex
+        for (int i = currentIndex; i != newIndex; i += step)
+        {
+            if (i < 0 || i >= totalSpaces) break; // Avoid out-of-bounds traversal
+            pm.spacesToMove.Enqueue(Spaces[i]);
+        }
+
+        // Add the final destination to the queue
+        pm.spacesToMove.Enqueue(newSpace);
+
+        // Update the player's current space
+        pm.space = newIndex; // No conversion needed, still 0-based
     }
+
+
+
 }

@@ -1,38 +1,82 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public static float speed = 10f;
     public int space = 1;
     public Queue<Space> spacesToMove = new Queue<Space>();
-    public Queue<bool> rollDirectionBackwards = new Queue<bool> ();
+
+    private int currentSpaceNumber = -1;
+
+    MovementController movementController = new MovementController();
+
+    private void Start()
+    {
+        CustomisableBehaviour custom = new HopBehaviour();
+        //custom.SetScaleFunctions("x", CustomisableBehaviour.Pulse);
+        //custom.SetScaleFunctions("z", CustomisableBehaviour.Pulse);
+        
+        movementController.SetBehaviour(custom);
+    }
 
     private void Update()
     {
+
         if (spacesToMove.Count > 0)
         {
             move();
         }
+
+        //Deubg
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            int spaceNumber = 30;
+            MoveToSpace(30);
+        }
+
+        movementController.Update(transform);
+
+    }
+
+    public void MoveToSpace(int spaceNumber)
+    {
+        Space targetSpace = BoardManager.instance.Spaces[spaceNumber - 1];
+        Vector3 spacePos = CalculateTargetPosition(targetSpace);
+        Vector3 startPosition = transform.position;
+
+        CustomisableBehaviour tempBehaviour = new MoveAcrossBoardBehaviour();
+        movementController.SetTemporaryBehaviour(tempBehaviour, 1);
+        space = spaceNumber;
+        movementController.SetStartAndEnd(startPosition, spacePos);
     }
 
     void move()
     {
         if (spacesToMove.Count > 0)
         {
+
             Space targetSpace = spacesToMove.Peek();
-            Vector3 targetPosition = CalculateTargetPosition(targetSpace);
+            if (currentSpaceNumber == -1 || currentSpaceNumber != targetSpace.spaceNumber)
+            {
+                currentSpaceNumber = targetSpace.spaceNumber;
 
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+                Vector3 targetPosition = CalculateTargetPosition(targetSpace);
+                Vector3 startPosition = transform.position;
 
-            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+                movementController.SetStartAndEnd(startPosition, targetPosition);
+            }
+
+
+            if (movementController.MovementComplete())
             {
                 spacesToMove.Dequeue();
-                rollDirectionBackwards.Dequeue();
             }
         }
+
     }
+
 
     Vector3 CalculateTargetPosition(Space targetSpace)
     {
