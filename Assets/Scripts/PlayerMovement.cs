@@ -1,13 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public static float speed = 10f;
+    public static float speed = 5f;
     public int space = 1;
     public Queue<Space> spacesToMove = new Queue<Space>();
     public Queue<bool> rollDirectionBackwards = new Queue<bool> ();
+
+    private int currentSpaceNumber = -1;
+    MovementController movementController = new MovementController();
 
     private void Update()
     {
@@ -21,18 +25,29 @@ public class PlayerMovement : MonoBehaviour
     {
         if (spacesToMove.Count > 0)
         {
+            movementController.Update();
             Space targetSpace = spacesToMove.Peek();
-            Vector3 targetPosition = CalculateTargetPosition(targetSpace);
 
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+            if (currentSpaceNumber == -1 || currentSpaceNumber != targetSpace.spaceNumber)
+            {
+                currentSpaceNumber = targetSpace.spaceNumber;
+                Vector3 targetPosition = CalculateTargetPosition(targetSpace);
+                Vector3 startPosition = transform.position; // Set start position
 
-            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+                movementController.SetMovementBehaviour(typeof(HopBehaviour));
+                movementController.SetStartAndEnd(startPosition, targetPosition);
+            }
+
+            transform.position = movementController.GetCurrentPosition();
+
+            if (movementController.MovementComplete())
             {
                 spacesToMove.Dequeue();
                 rollDirectionBackwards.Dequeue();
             }
         }
     }
+
 
     Vector3 CalculateTargetPosition(Space targetSpace)
     {
