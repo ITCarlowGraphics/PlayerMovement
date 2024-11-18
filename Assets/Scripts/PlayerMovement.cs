@@ -33,11 +33,9 @@ public class PlayerMovement : MonoBehaviour
                 currentSpaceNumber = targetSpace.spaceNumber;
                 Vector3 targetPosition = CalculateTargetPosition(targetSpace);
                 Vector3 startPosition = transform.position; // Set start position
-                movementController.SetStartAndEnd(startPosition, targetPosition);
 
-                // Interface:
-                // MovementBehaviour movementBehaviour.setStartAndEnd(start, end);
-                // movementBeahviour.setBehaviour(MovementBehaviour::EaseInOut);
+                movementController.SetMovementBehaviour(typeof(HopBehaviour));
+                movementController.SetStartAndEnd(startPosition, targetPosition);
             }
 
             transform.position = movementController.GetCurrentPosition();

@@ -11,7 +11,18 @@ public class MovementController
     IMovementBehaviour m_MovementBehaviour;
     public MovementController()
     {
-        m_MovementBehaviour = new EaseInOutBehaviour();
+        m_MovementBehaviour = new HopBehaviour();
+    }
+
+    public void SetMovementBehaviour(System.Type movementBehaviourType)
+    {
+        // Ensure the type is compatible
+        if (typeof(IMovementBehaviour).IsAssignableFrom(movementBehaviourType)) {
+            m_MovementBehaviour = (IMovementBehaviour)Activator.CreateInstance(movementBehaviourType);
+        }
+        else {
+            Debug.LogError("Invalid Movement Behaviour Type!");
+        }
     }
     
     public Vector3 GetCurrentPosition() {
@@ -30,12 +41,6 @@ public class MovementController
 
     public void Update()
     {
-
         m_MovementBehaviour.Update();
-        //// Cubic Movement
-        //// adjustedProgress = movementProgress * movementProgress * movementProgress; // Ease-In
-        //// adjustedProgress = 1 - Mathf.Pow(1 - movementProgress, 3); // Ease-Out
-        //adjustedProgress = 3 * movementProgress * movementProgress - 2 * movementProgress * movementProgress * movementProgress; // Ease-In-Out
-        
     }
 }
