@@ -40,7 +40,17 @@ public class PlayerMovement : MonoBehaviour
 
             transform.position = movementController.GetCurrentPosition();
 
+<<<<<<< Updated upstream
+            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+=======
+                movementController.SetMovementBehaviour(typeof(EaseInOutBehaviour));
+                movementController.SetStartAndEnd(startPosition, targetPosition);
+            }
+
+            transform.position = movementController.GetCurrentPosition();
+
             if (movementController.MovementComplete())
+>>>>>>> Stashed changes
             {
                 spacesToMove.Dequeue();
                 rollDirectionBackwards.Dequeue();

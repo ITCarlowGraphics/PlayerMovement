@@ -1,27 +1,36 @@
-using Codice.CM.Common;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EaseInOutBehaviour : IMovementBehaviour
 {
-    public float speed = 2.5f;
-    public float power = 2f;
-    Vector3 p0;
-    Vector3 p1;
+    public float duration = 0.5f; // Fixed duration to reach the destination
 
-    Vector3 currentPosition;
-    private float movementProgress; // Tracks progress manually
+    private Vector3 startPosition;
+    private Vector3 endPosition;
+    private Vector3 currentPosition;
     private float startTime;
-    public float duration = 0.5f;  // Fixed duration to reach the destination
+    private bool isMovementComplete;
 
-    public void SetStartAndEnd(Vector3 start, Vector3 end)
+    // Delegate to define easing functions
+    public delegate float EasingFunction(float progress);
+
+    // Default easing functions
+    public static float EaseInQuadratic(float progress) => Mathf.Pow(progress, 2);
+    public static float EaseOutQuadratic(float progress) => 1 - Mathf.Pow(1 - progress, 2);
+
+    private EasingFunction easingFunctionX;
+    private EasingFunction easingFunctionZ;
+
+    public void SetStartAndEnd(Vector3 start, Vector3 end,
+        EasingFunction easingX = null, EasingFunction easingZ = null)
     {
-        p0 = start;
-        p1 = end;
-
-        movementProgress = 0f; // Reset progress
+        startPosition = start;
+        endPosition = end;
         startTime = Time.time;
+        isMovementComplete = false;
+
+        // Assign easing functions or default to ease-in quadratic
+        easingFunctionX = easingX ?? EaseInQuadratic;
+        easingFunctionZ = easingZ ?? EaseInQuadratic;
     }
 
     public Vector3 GetCurrentPosition()
@@ -31,32 +40,28 @@ public class EaseInOutBehaviour : IMovementBehaviour
 
     public bool MovementComplete()
     {
-        if (movementProgress >= 1f)
-        {
-            return true;
-        }
-        return false;
+        return isMovementComplete;
     }
 
     public void Update()
     {
+        if (isMovementComplete) return;
+
         float elapsedTime = Time.time - startTime;
+        float progress = Mathf.Clamp01(elapsedTime / duration);
 
-        movementProgress = Mathf.Clamp01(elapsedTime / duration);
+        // Apply easing to x and z axes
+        float easedX = easingFunctionX(progress);
+        float easedZ = easingFunctionZ(progress);
 
-        // Generalized power-based Ease-In-Out function
-        float adjustedProgress;
-        if (movementProgress < 0.5f)
+        currentPosition.x = Mathf.Lerp(startPosition.x, endPosition.x, easedX);
+        currentPosition.z = Mathf.Lerp(startPosition.z, endPosition.z, easedZ);
+        currentPosition.y = Mathf.Lerp(startPosition.y, endPosition.y, progress); // Linear for Y-axis
+
+        // Check if movement is complete
+        if (progress >= 1f)
         {
-            // First half: Ease-In
-            adjustedProgress = Mathf.Pow(movementProgress * 2, power) / 2f;
+            isMovementComplete = true;
         }
-        else
-        {
-            // Second half: Ease-Out
-            adjustedProgress = 1f - Mathf.Pow(2f * (1f - movementProgress), power) / 2f;
-        }
-
-        currentPosition = Vector3.Lerp(p0, p1, adjustedProgress);
     }
 }

@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
                 Vector3 targetPosition = CalculateTargetPosition(targetSpace);
                 Vector3 startPosition = transform.position; // Set start position
 
-                movementController.SetMovementBehaviour(typeof(HopBehaviour));
+                movementController.SetMovementBehaviour(typeof(EaseInOutBehaviour));
                 movementController.SetStartAndEnd(startPosition, targetPosition);
             }
 
