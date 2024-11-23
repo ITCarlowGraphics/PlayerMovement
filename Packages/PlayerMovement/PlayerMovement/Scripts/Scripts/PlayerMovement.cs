@@ -11,13 +11,14 @@ public class PlayerMovement : MonoBehaviour
     public Queue<bool> rollDirectionBackwards = new Queue<bool> ();
 
     private int currentSpaceNumber = -1;
+
+    float movementDuration = 0.5f;
     MovementController movementController = new MovementController();
 
     private void Start()
     {
         CustomisableBehaviour custom = new HopBehaviour();
-        float movementDuration = 0.5f;
-
+        
         movementController.SetBehaviour(custom);
         movementController.SetMovementDuration(movementDuration);
     }
@@ -34,19 +35,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (spacesToMove.Count > 0)
         {
-            movementController.Update();
 
             Space targetSpace = spacesToMove.Peek();
             if (currentSpaceNumber == -1 || currentSpaceNumber != targetSpace.spaceNumber)
             {
                 currentSpaceNumber = targetSpace.spaceNumber;
+
                 Vector3 targetPosition = CalculateTargetPosition(targetSpace);
                 Vector3 startPosition = transform.position;
 
                 movementController.SetStartAndEnd(startPosition, targetPosition);
             }
 
-            transform.position = movementController.GetCurrentPosition();
+            movementController.Update(transform);
 
             if (movementController.MovementComplete())
             {
