@@ -13,6 +13,15 @@ public class PlayerMovement : MonoBehaviour
     private int currentSpaceNumber = -1;
     MovementController movementController = new MovementController();
 
+    private void Start()
+    {
+        CustomisableBehaviour custom = new HopBehaviour();
+        float movementDuration = 0.5f;
+
+        movementController.SetBehaviour(custom);
+        movementController.SetMovementDuration(movementDuration);
+    }
+
     private void Update()
     {
         if (spacesToMove.Count > 0)
@@ -26,36 +35,26 @@ public class PlayerMovement : MonoBehaviour
         if (spacesToMove.Count > 0)
         {
             movementController.Update();
-            Space targetSpace = spacesToMove.Peek();
 
+            Space targetSpace = spacesToMove.Peek();
             if (currentSpaceNumber == -1 || currentSpaceNumber != targetSpace.spaceNumber)
             {
                 currentSpaceNumber = targetSpace.spaceNumber;
                 Vector3 targetPosition = CalculateTargetPosition(targetSpace);
-                Vector3 startPosition = transform.position; // Set start position
+                Vector3 startPosition = transform.position;
 
-                movementController.SetMovementBehaviour(typeof(HopBehaviour));
-                movementController.SetStartAndEnd(startPosition, targetPosition);
-            }
-
-            transform.position = movementController.GetCurrentPosition();
-
-<<<<<<< Updated upstream
-            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
-=======
-                movementController.SetMovementBehaviour(typeof(EaseInOutBehaviour));
                 movementController.SetStartAndEnd(startPosition, targetPosition);
             }
 
             transform.position = movementController.GetCurrentPosition();
 
             if (movementController.MovementComplete())
->>>>>>> Stashed changes
             {
                 spacesToMove.Dequeue();
                 rollDirectionBackwards.Dequeue();
             }
         }
+
     }
 
 

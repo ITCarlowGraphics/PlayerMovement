@@ -8,35 +8,39 @@ using UnityEngine;
 
 public class MovementController
 {
-    IMovementBehaviour m_MovementBehaviour;
-    public MovementController()
-    {
-        m_MovementBehaviour = new HopBehaviour();
-    }
+    private CustomisableBehaviour currentBehaviour;
+    private Vector3 startPosition, endPosition, currentPosition;
+    private float startTime, duration;
+    private bool isMovementComplete = false;
 
-    public void SetMovementBehaviour(System.Type movementBehaviourType)
-    {
-        // Ensure the type is compatible
-        if (typeof(IMovementBehaviour).IsAssignableFrom(movementBehaviourType)) {
-            m_MovementBehaviour = (IMovementBehaviour)Activator.CreateInstance(movementBehaviourType);
-        }
-        else {
-            Debug.LogError("Invalid Movement Behaviour Type!");
-        }
-    }
-    
-    public Vector3 GetCurrentPosition() {
-        return m_MovementBehaviour.GetCurrentPosition();
-    }
-
-    public bool MovementComplete()
-    {
-        return m_MovementBehaviour.MovementComplete();
-    }
+    public void SetBehaviour(CustomisableBehaviour behaviour) => currentBehaviour = behaviour;
+    public Vector3 GetCurrentPosition() => currentPosition;
+    public void SetMovementDuration(float movementDuration) => duration = movementDuration;
+    public bool MovementComplete() => isMovementComplete;
 
     public void SetStartAndEnd(Vector3 start, Vector3 end)
     {
-        m_MovementBehaviour.SetStartAndEnd(start, end);
+        startPosition = start;
+        endPosition = end;
+        startTime = Time.time;
+        isMovementComplete = false;
+
+        currentBehaviour.SetStartAndEnd(start, end);
+    }
+
+    public void Update()
+    {
+        if (isMovementComplete) return;
+
+        float elapsedTime = Time.time - startTime;
+        float progress = Mathf.Clamp01(elapsedTime / duration);
+
+        currentPosition = currentBehaviour.EvaluatePosition(progress);
+
+        if (progress >= 1f)
+        {
+            isMovementComplete = true;
+        }
     }
 
     public void Update()
