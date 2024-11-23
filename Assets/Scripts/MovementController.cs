@@ -1,5 +1,4 @@
 using Codice.CM.Common;
-using log4net.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,12 +8,11 @@ using UnityEngine;
 public class MovementController
 {
     private CustomisableBehaviour currentBehaviour;
-    private Vector3 startPosition, endPosition, currentPosition;
+    private Vector3 startPosition, endPosition;
     private float startTime, duration;
     private bool isMovementComplete = false;
 
     public void SetBehaviour(CustomisableBehaviour behaviour) => currentBehaviour = behaviour;
-    public Vector3 GetCurrentPosition() => currentPosition;
     public void SetMovementDuration(float movementDuration) => duration = movementDuration;
     public bool MovementComplete() => isMovementComplete;
 
@@ -28,14 +26,14 @@ public class MovementController
         currentBehaviour.SetStartAndEnd(start, end);
     }
 
-    public void Update()
+    public void Update(Transform currentTransform)
     {
         if (isMovementComplete) return;
 
         float elapsedTime = Time.time - startTime;
         float progress = Mathf.Clamp01(elapsedTime / duration);
 
-        currentPosition = currentBehaviour.EvaluatePosition(progress);
+        currentBehaviour.EvaluateTransform(currentTransform, progress);
 
         if (progress >= 1f)
         {
