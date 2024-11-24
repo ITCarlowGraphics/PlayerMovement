@@ -12,7 +12,7 @@ public class PlayerMovement : MonoBehaviour
 
     private int currentSpaceNumber = -1;
 
-    float movementDuration = 0.5f;
+    float movementDuration = 0.75f;
     MovementController movementController = new MovementController();
 
     private void Start()

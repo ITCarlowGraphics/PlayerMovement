@@ -3,46 +3,6 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class HopBehaviour : CustomisableBehaviour
-{
-    public HopBehaviour()
-    {
-        SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
-        SetMovementFunction("up", Hop);
-    }
-}
-public class FlippingBehaviour : CustomisableBehaviour
-{
-    public FlippingBehaviour()
-    {
-        SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
-        SetMovementFunction("up", progress =>
-        {
-            const float flipHeight = 1.6f;
-            return Mathf.Sin(progress * Mathf.PI) * flipHeight;
-        });
-        SetRotationFunction("pitch", SpeedUpContinueAndSlowDown);
-    }
-}
-
-public class WobbleBehaviour : CustomisableBehaviour
-{
-    public WobbleBehaviour()
-    {
-        SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
-        SetScaleFunctions("side", Wobble);
-    }
-}
-
-public class BouncingBehaviour : CustomisableBehaviour
-{
-    public BouncingBehaviour()
-    {
-        SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
-        SetMovementFunction("up", Bounce);
-    }
-}
-
 public class CustomisableBehaviour
 {
     protected Vector3 startPosition, endPosition;
@@ -131,6 +91,9 @@ public class CustomisableBehaviour
         transform.localScale = localScale;
     }
 
+    ///////////////////////////////////////////
+    /// Example functions that can be applied
+    //////////////////////////////////////////
     public float Hop(float progress)
     {
         const float hopHeight = 1.3f; 
