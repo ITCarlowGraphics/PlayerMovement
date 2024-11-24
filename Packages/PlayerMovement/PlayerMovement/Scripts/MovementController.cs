@@ -40,9 +40,4 @@ public class MovementController
             isMovementComplete = true;
         }
     }
-
-    public void Update()
-    {
-        m_MovementBehaviour.Update();
-    }
 }
