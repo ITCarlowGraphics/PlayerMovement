@@ -11,13 +11,42 @@ public class PlayerMovement : MonoBehaviour
     private int currentSpaceNumber = -1;
 
     MovementController movementController = new MovementController();
+    
+    public void SetExampleOne()
+    {
+        CustomisableBehaviour custom = new HopBehaviour();
+        movementController.SetBehaviour(custom);
+    }
+
+    public void SetExampleTwo()
+    {
+        CustomisableBehaviour custom = new MoveAcrossBoardBehaviour();
+        movementController.SetBehaviour(custom);
+    }
+
+    public void SetExampleThree()
+    {
+        CustomisableBehaviour custom = new FlippingBehaviour();
+        movementController.SetBehaviour(custom);
+    }
+
+    public void SetExampleFour()
+    {
+        CustomisableBehaviour custom = new SideFlipBehaviour();
+        movementController.SetBehaviour(custom);
+    }
+
+    public void SetExampleFive()
+    {
+        CustomisableBehaviour custom = new SlitherBehaviour();
+        movementController.SetBehaviour(custom);
+    }
+
 
     private void Start()
     {
+        // Our default behaviour
         CustomisableBehaviour custom = new HopBehaviour();
-        //custom.SetScaleFunctions("x", CustomisableBehaviour.Pulse);
-        //custom.SetScaleFunctions("z", CustomisableBehaviour.Pulse);
-        
         movementController.SetBehaviour(custom);
     }
 
@@ -46,7 +75,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 spacePos = CalculateTargetPosition(targetSpace);
         Vector3 startPosition = transform.position;
 
-        CustomisableBehaviour tempBehaviour = new MoveAcrossBoardBehaviour();
+        CustomisableBehaviour tempBehaviour = new HopBehaviour();
         movementController.SetTemporaryBehaviour(tempBehaviour, 1);
         space = spaceNumber;
         movementController.SetStartAndEnd(startPosition, spacePos);

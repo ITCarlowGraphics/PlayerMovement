@@ -25,10 +25,24 @@ public class HopBehaviour : CustomisableBehaviour
         SetScaleFunctions("x", ScaleDownAndUp);
         SetScaleFunctions("z", ScaleDownAndUp);
         SetScaleFunctions("y", ScaleDownAndUp);
+        SetRotationFunction("roll", Spiral);
         const float HopDuration = 0.5f;
         SetMovementDuration(HopDuration);
     }
 }
+
+public class SideFlipBehaviour : CustomisableBehaviour
+{
+    public SideFlipBehaviour()
+    {
+        SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
+        SetMovementFunction("up", Hop);
+        SetRotationFunction("roll", Spiral);
+        const float HopDuration = 0.5f;
+        SetMovementDuration(HopDuration);
+    }
+}
+
 public class FlippingBehaviour : CustomisableBehaviour
 {
     public FlippingBehaviour()
@@ -45,9 +59,9 @@ public class FlippingBehaviour : CustomisableBehaviour
     }
 }
 
-public class SlitherBeahviour : CustomisableBehaviour
+public class SlitherBehaviour : CustomisableBehaviour
 {
-    public SlitherBeahviour()
+    public SlitherBehaviour()
     {
         SetMovementFunction("forward", progress => Mathf.Lerp(0, Vector3.Distance(startPosition, endPosition), progress));
         SetMovementFunction("side", ZigZag);
