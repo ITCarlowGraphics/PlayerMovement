@@ -14,6 +14,24 @@ The **Custom Player Movement Package** provides a flexible system to define and 
 
 ---
 
+## Example
+
+### Sample Scene
+
+Here we are testing the movement on a board game. The player moves through board spaces by entering the amount of spaces into the text box and clicking "Move".
+You can also click next to select a different piece to move.
+
+You can try out some of the preset behaviours by clicking on buttons labelled with "Behaviour". There are 5 presets to choose from.
+#### 1. Hopping
+#### 2. A "Big" Hop
+#### 3. Front Flipping
+#### 4. Side Flipping
+#### 5. Slithering.
+
+There are many customisations to be made, so continue to read to see how you can make your own cool behaviour!
+
+---
+
 ## Getting Started
 
 ### 1. Initializing the Movement Controller
